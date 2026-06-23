@@ -1,0 +1,9 @@
+Title: Memory Management and Paging
+
+Paging is a memory management scheme that divides logical memory into fixed-size blocks called pages, and physical memory into equally sized blocks called frames. This allows a process's memory to be allocated non-contiguously.
+
+Key points:
+- The OS maintains a page table per process, mapping page numbers to frame numbers.
+- Paging eliminates external fragmentation since any free frame can hold any page.
+- It can still cause internal fragmentation, since the last page of a process may not fully use its allocated frame.
+- A Translation Lookaside Buffer (TLB) is a hardware cache that speeds up the virtual-to-physical address translation by caching recent page table entries.

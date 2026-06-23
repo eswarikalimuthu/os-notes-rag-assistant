@@ -1,0 +1,8 @@
+Title: Page Replacement Algorithms
+
+When physical memory is full and a new page must be brought in, the OS must choose an existing page to evict. Common page replacement algorithms:
+
+- FIFO (First In First Out): Evicts the oldest page loaded into memory. Simple, but can suffer from Belady's Anomaly (more frames leading to more page faults in some cases).
+- LRU (Least Recently Used): Evicts the page that has not been used for the longest time. Performs well in practice but is more expensive to implement exactly (often approximated).
+- Optimal (MIN) Algorithm: Evicts the page that will not be used for the longest time in the future. Theoretically optimal but not implementable in practice since it requires future knowledge; used as a benchmark.
+- Second-Chance / Clock Algorithm: An approximation of LRU using a reference bit, cheaper to implement than true LRU.

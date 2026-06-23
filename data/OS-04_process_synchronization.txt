@@ -1,0 +1,10 @@
+Title: Process Synchronization
+
+When multiple processes or threads access shared data concurrently, race conditions can occur, producing inconsistent results depending on execution order.
+
+Key concepts:
+- Critical Section: A code segment that accesses shared resources and must not be executed by more than one process/thread at a time.
+- Mutex (Mutual Exclusion lock): A binary lock; only the thread that acquired it can release it. Used to protect a critical section.
+- Semaphore: A signaling mechanism using a counter. A binary semaphore behaves like a mutex; a counting semaphore allows a fixed number of concurrent accesses (useful for resource pools).
+- Monitors: A higher-level synchronization construct that combines mutual exclusion with condition variables, often built into languages like Java.
+- Classic problems used to study synchronization: Producer-Consumer, Readers-Writers, and Dining Philosophers.

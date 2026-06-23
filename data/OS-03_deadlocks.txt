@@ -1,0 +1,15 @@
+Title: Deadlocks
+
+A deadlock occurs when two or more processes are each waiting indefinitely for a resource held by another process in the same set, so none of them can proceed.
+
+Four necessary conditions for deadlock (all must hold simultaneously):
+1. Mutual Exclusion: At least one resource must be held in a non-shareable mode.
+2. Hold and Wait: A process holding at least one resource is waiting to acquire additional resources held by others.
+3. No Preemption: Resources cannot be forcibly taken away from a process; they must be released voluntarily.
+4. Circular Wait: A set of processes are waiting for each other in a circular chain.
+
+Handling strategies:
+- Prevention: Design the system so at least one of the four conditions can never hold.
+- Avoidance: Use algorithms like the Banker's Algorithm to only grant resource requests that keep the system in a safe state.
+- Detection and Recovery: Allow deadlocks to occur, detect them via resource-allocation graphs, and recover by process termination or resource preemption.
+- Ignorance (Ostrich Algorithm): Used by some general-purpose OSes when deadlocks are rare enough that the cost of prevention outweighs the cost of occasional deadlocks.

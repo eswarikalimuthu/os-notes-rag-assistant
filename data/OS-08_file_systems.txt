@@ -1,0 +1,9 @@
+Title: File Systems
+
+A file system defines how data is organized, stored, named, and retrieved on secondary storage.
+
+Key points:
+- File Allocation Methods: Contiguous allocation (fast access, but fragmentation issues), Linked allocation (no external fragmentation, but slow random access), and Indexed allocation (uses an index block of pointers, good balance of both).
+- Free Space Management: Common techniques include bitmaps (one bit per block) and linked lists of free blocks.
+- Directory Structures: Organize files hierarchically (tree-structured directories) for ease of navigation and access control.
+- Examples: NTFS (Windows) supports journaling and access control lists; ext4 (Linux) supports journaling and large file sizes; FAT32 is simple and widely compatible but lacks modern features like journaling or large file support.

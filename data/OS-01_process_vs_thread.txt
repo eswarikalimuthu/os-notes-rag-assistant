@@ -1,0 +1,9 @@
+Title: Process vs Thread
+
+A process is an independent program in execution with its own memory space, file handles, and system resources. A thread is a lightweight unit of execution within a process that shares memory and resources with other threads of the same process.
+
+Key differences:
+- Processes do not share memory by default; threads within a process do.
+- Context switching between processes is more expensive than between threads, since the OS must save/restore more state.
+- A crash in one thread can bring down the entire process, since they share the same address space; a crash in one process typically does not affect other processes.
+- Inter-process communication (IPC) requires mechanisms like pipes, shared memory, or message queues, while threads can communicate directly through shared variables (with proper synchronization).

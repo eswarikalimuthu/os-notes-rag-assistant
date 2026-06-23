@@ -1,0 +1,9 @@
+Title: CPU Scheduling Algorithms
+
+CPU scheduling determines which process in the ready queue is given the CPU next. Common algorithms:
+
+- First Come First Served (FCFS): Processes are scheduled in arrival order. Simple but can cause long waiting times (convoy effect).
+- Shortest Job First (SJF): The process with the smallest burst time runs next. Minimizes average waiting time but can starve longer jobs.
+- Priority Scheduling: Each process is assigned a priority; higher priority runs first. Can lead to starvation of low-priority processes without aging.
+- Round Robin (RR): Each process gets a fixed time quantum in a cyclic order. Fair and responsive, well suited to time-sharing systems, but throughput depends heavily on quantum size.
+- Multilevel Queue / Multilevel Feedback Queue: Processes are split into multiple queues by type or priority, with rules for moving between queues based on behavior.

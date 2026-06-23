@@ -1,249 +1,127 @@
-# OS Notes RAG Assistant
+# OS Notes RAG Assistant (Python backend)
 
-A Retrieval-Augmented Generation (RAG) application that answers Operating Systems questions using a custom knowledge base, semantic search, and a local Large Language Model (LLM).
+A real Retrieval-Augmented Generation pipeline over a small Operating Systems notes
+corpus, using:
+- **sentence-transformers** (`all-MiniLM-L6-v2`) for real embeddings
+- **ChromaDB** as the vector database
+- **Anthropic Claude API** for grounded answer generation
+- **FastAPI** to expose it as an HTTP API (plus a terminal CLI for quick testing)
 
-The system retrieves relevant Operating Systems notes from a vector database and generates grounded responses with source citations, improving answer accuracy and reliability.
+## 1. Requirements
+- Python 3.9+
+- An Anthropic API key (https://console.anthropic.com -> Settings -> API Keys)
+- Internet access (to download the embedding model on first run, and to call the API)
 
----
-
-## Project Overview
-
-Traditional LLMs can generate inaccurate or hallucinated responses when answering domain-specific questions. This project addresses that challenge using Retrieval-Augmented Generation (RAG).
-
-When a user submits a query:
-
-1. The query is converted into vector embeddings.
-2. ChromaDB retrieves the most relevant Operating Systems notes.
-3. The retrieved content is provided to the language model.
-4. The model generates a response based on the retrieved context.
-5. Sources and retrieval scores are displayed alongside the answer.
-
----
-
-## Features
-
-* Semantic search using Sentence Transformers
-* Retrieval-Augmented Generation (RAG)
-* ChromaDB vector database
-* Local LLM integration using Ollama
-* Streamlit web interface
-* FastAPI backend API
-* Source citations
-* Retrieval queue visualization
-* Local execution without external API costs
-
----
-
-## System Architecture
-
-```text
-User Query
-    ↓
-Sentence Transformer Embeddings
-    ↓
-ChromaDB Vector Database
-    ↓
-Top-K Relevant Chunks Retrieval
-    ↓
-Ollama Local LLM
-    ↓
-Grounded Answer with Citations
-```
-
----
-
-## Technology Stack
-
-### Frontend
-
-* Streamlit
-
-### Backend
-
-* FastAPI
-* Python
-
-### Vector Database
-
-* ChromaDB
-
-### Embeddings
-
-* Sentence Transformers
-
-### Language Model
-
-* Ollama
-
-### Additional Libraries
-
-* Requests
-* Pydantic
-* Uvicorn
-
----
-
-## Project Structure
-
-```text
-os-notes-rag-assistant/
-│
-├── app.py
-├── frontend.py
-├── cli.py
-├── rag.py
-├── rag_free.py
-├── ingest.py
-├── requirements.txt
-├── README.md
-├── data/
-├── chroma_db/
-└── .gitignore
-```
-
----
-
-## Installation
-
-### Clone the Repository
+## 2. Setup
 
 ```bash
-git clone https://github.com/eswarikalimuthu/os-notes-rag-assistant.git
-cd os-notes-rag-assistant
-```
-
-### Create a Virtual Environment
-
-```bash
+# 1. Create a virtual environment (recommended)
 python -m venv venv
-```
+source venv/bin/activate        # on Windows: venv\Scripts\activate
 
-### Activate the Virtual Environment
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-### Install Dependencies
-
-```bash
+# 2. Install dependencies
 pip install -r requirements.txt
+
+# 3. Set your API key
+cp .env.example .env
+# then edit .env and paste your real key
 ```
 
----
-
-## Build the Vector Database
+## 3. Build the vector database (run once, and again whenever /data changes)
 
 ```bash
 python ingest.py
 ```
 
-This command loads the Operating Systems notes and stores their embeddings in ChromaDB.
+This reads every `.txt` file in `/data`, embeds it with sentence-transformers, and
+stores the vectors in a local persistent ChromaDB at `./chroma_db`. The first run will
+download the embedding model (~90MB) — this needs internet access.
 
----
+## 3.5 Want this 100% free, no API key at all?
 
-## Run the Backend
+Everything except the final answer-generation step is already free and local
+(embeddings + ChromaDB run on your machine). To make generation free too, swap
+the Claude API for a local LLM via **Ollama**:
+
+```bash
+# 1. Install Ollama: https://ollama.com/download
+# 2. Pull a small free model
+ollama pull llama3.2        # or `ollama pull phi3` on a lower-RAM laptop
+```
+
+Then in `cli.py` and `app.py`, comment out `import rag` and uncomment
+`import rag_free as rag`. That's it — no `.env`, no API key, no internet
+needed after the model is pulled. `rag_free.py` does the exact same retrieval,
+just calls your local Ollama model instead of the Anthropic API for the answer.
+
+Tradeoff: local models like Llama 3.2 are noticeably less capable than Claude,
+so answers may be rougher — fine for a free demo, but mention this tradeoff
+explicitly in your project report; examiners respect that kind of honesty.
+
+
+
+```bash
+python cli.py
+```
+
+Example:
+```
+Ask> what is a deadlock
+--- Retrieved chunks ---
+  OS-03_deadlocks             (Deadlocks)  distance=0.31
+  ...
+--- Answer ---
+A deadlock occurs when... [OS-03_deadlocks]
+```
+
+## 5. Run as a real API (for your resume/demo)
 
 ```bash
 uvicorn app:app --reload
 ```
 
-API Documentation:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
----
-
-## Run the Frontend
+Then either:
+- Open **http://127.0.0.1:8000/docs** for an interactive Swagger UI, or
+- Call it directly:
 
 ```bash
-streamlit run frontend.py
+curl -X POST http://127.0.0.1:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{"query": "explain LRU page replacement", "k": 3}'
 ```
 
-Application URL:
+## 6. Project structure
 
-```text
-http://localhost:8501
+```
+os-rag-project/
+├── data/              # the "database" - one .txt file per OS topic chunk
+├── ingest.py           # embeds chunks and builds the ChromaDB vector store
+├── rag.py              # core retrieval + generation logic (used by app.py and cli.py)
+├── app.py               # FastAPI server exposing POST /ask
+├── cli.py                # terminal demo, no server needed
+├── requirements.txt
+├── .env.example
+└── chroma_db/          # created automatically by ingest.py (vector store on disk)
 ```
 
----
+## 7. How it actually works (for your viva/interview)
 
-## Demonstration
+1. **Indexing (ingest.py)**: each note chunk -> sentence-transformers embedding (384-dim
+   vector capturing meaning) -> stored in ChromaDB with its id and title as metadata.
+2. **Retrieval (rag.py: retrieve())**: your question is embedded with the *same* model,
+   then ChromaDB does a nearest-neighbour search to find the most semantically similar
+   chunks (lower distance = more relevant).
+3. **Generation (rag.py: generate_answer())**: the retrieved chunks are inserted into a
+   prompt sent to Claude, with a system prompt instructing it to answer only from that
+   context and cite chunk ids — this is what grounds the answer and reduces hallucination.
+4. **API (app.py)**: wraps the pipeline in a FastAPI POST endpoint so it could be plugged
+   into a real frontend, a Slack bot, etc.
 
-Add your project screenshot to the repository as:
-
-```text
-demo.png
-```
-
-Then include:
-
-```markdown
-![OS Notes RAG Assistant](demo.png)
-```
-
----
-
-## Sample Query
-
-Question:
-
-```text
-What is a deadlock?
-```
-
-Answer:
-
-```text
-A deadlock occurs when two or more processes are each waiting indefinitely for a resource held by another process in the same set, so none of them can proceed.
-```
-
-Retrieved Sources:
-
-* OS-03 Deadlocks
-* OS-04 Process Synchronization
-* OS-01 Process vs Thread
-
----
-
-## Learning Outcomes
-
-This project provided practical experience in:
-
-* Retrieval-Augmented Generation (RAG)
-* Vector Databases
-* Embedding Models
-* Semantic Search
-* Prompt Engineering
-* FastAPI Development
-* Streamlit Application Development
-* Local LLM Deployment using Ollama
-
----
-
-## Future Enhancements
-
-* PDF upload and indexing
-* Conversational memory
-* Hybrid Search (Keyword + Vector)
-* Multi-document support
-* User authentication
-* Cloud deployment
-
----
-
-## license
-This project is for educational and learning purpose only
-[OS Notes RAG Assistant](sc-1.png)
-[OS Notes RAG Assistant](sc-2.png)
-[OS Notes RAG Assistant](sc-3.png)
-[OS Notes RAG Assistant](sc-4.png)
-[OS Notes RAG Assistant](sc-5.png)
-[OS Notes RAG Assistant](sc-6.png)
-
-
-GitHub: https://github.com/eswarikalimuthu
+## 8. Extending this for a stronger resume project
+- Swap `/data` for your actual course PDFs (use a PDF parser like `pypdf` and chunk by
+  paragraph instead of by file).
+- Add an evaluation script that runs a fixed set of test questions and checks whether
+  the answer cites the expected chunk id.
+- Add a simple web frontend (Streamlit or a small React app) that calls `/ask`.
+- Track retrieval quality with `distance` thresholds — if all chunks have a high distance,
+  have the bot say "I don't have information on that" instead of guessing.

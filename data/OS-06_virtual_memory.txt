@@ -1,0 +1,9 @@
+Title: Virtual Memory
+
+Virtual memory allows a process to behave as though it has access to more memory than is physically available, by keeping only actively used portions in RAM and the rest on secondary storage (disk).
+
+Key points:
+- Demand Paging: Pages are loaded into memory only when they are actually accessed, not all at once.
+- Page Fault: Occurs when a process accesses a page that is not currently in physical memory; the OS must then fetch it from disk, which is comparatively slow.
+- Thrashing: Happens when a system spends more time swapping pages in and out than executing actual processes, usually due to insufficient physical memory for the working set of active processes.
+- Virtual memory enables multiprogramming with limited physical RAM and provides memory isolation between processes.
