@@ -238,5 +238,12 @@ This project provided practical experience in:
 
 ## license
 This project is for educational and learning purpose only
+[OS Notes RAG Assistant](sc-1.png)
+[OS Notes RAG Assistant](sc-2.png)
+[OS Notes RAG Assistant](sc-3.png)
+[OS Notes RAG Assistant](sc-4.png)
+[OS Notes RAG Assistant](sc-5.png)
+[OS Notes RAG Assistant](sc-6.png)
+
 
 GitHub: https://github.com/eswarikalimuthu
